@@ -64,7 +64,8 @@ body {
 .hero-copy-col {
     position: relative;
     z-index: 20;
-    background: var(--clr-bg);
+    /* Solución #1: Fondo del contenedor text con degradado fluido hacia la derecha */
+    background: linear-gradient(to right, var(--clr-bg) 75%, rgba(240, 242, 248, 0) 100%) !important;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -73,20 +74,7 @@ body {
     min-height: var(--hero-h);
 }
 
-/* Línea decorativa sutil a la derecha */
-.hero-copy-col::after {
-    content: '';
-    position: absolute;
-    right: 0;
-    top: 15%;
-    height: 70%;
-    width: 1px;
-    background: linear-gradient(to bottom,
-            transparent,
-            rgba(108, 99, 255, 0.2) 40%,
-            rgba(167, 139, 250, 0.2) 60%,
-            transparent);
-}
+/* (Línea central vertical eliminada para permitir fundido suave) */
 
 .hero-copy {
     max-width: 500px;
@@ -237,31 +225,31 @@ body {
     z-index: 0;
 }
 
-/* Degradado inferior — corte suave del grid en el borde */
-.iso-showcase-col::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 20%;
-    background: linear-gradient(to top, var(--clr-bg) 0%, transparent 100%);
-    pointer-events: none;
-    z-index: 10;
-}
+/* Degradado inferior — ELIMINADO para mantener el corte limpio en la parte inferior */
+/* .iso-showcase-col::after { ... } */
 
-/* Contenedor de perspectiva — ABSOLUTO para NO afectar el flujo de Bootstrap */
+/* Contenedor de perspectiva — Efecto Infinito */
 .isometric-showcase {
     position: absolute;
-    inset: 0;
+    top: 50%;
+    left: -20%;
+    /* Se estira bajo el texto */
+    width: 150vw;
+    /* Anchura extendida para simular infinito */
+    height: 150%;
+    /* Altura extendida para horizonte lejano */
+    transform: translateY(-50%);
     z-index: 1;
+    /* IMPORTANTE: Capa por debajo del texto (z-index 20) */
     overflow: visible;
-    perspective: 1500px;
+    perspective: 2000px;
     perspective-origin: 50% 40%;
     display: flex;
     align-items: center;
-    /* centra el grid verticalmente */
-    padding-left: 2%;
+
+    /* Máscara: El frente es sólido y el horizonte (arriba a la derecha) se desvanece */
+    -webkit-mask-image: linear-gradient(to top right, black 50%, rgba(0, 0, 0, 0.3) 75%, transparent 100%) !important;
+    mask-image: linear-gradient(to top right, black 50%, rgba(0, 0, 0, 0.3) 75%, transparent 100%) !important;
 }
 
 /* ── Grid rotado isométrico ───────────────────────────────── */
@@ -311,29 +299,63 @@ body {
     animation: screenFloat 7s ease-in-out infinite alternate;
 }
 
-/* Delays escalonados */
-.grid-column:nth-child(1) .app-screen:nth-child(1) {
-    animation-delay: 0s;
+/* Delays escalonados para efecto flotante orgánico y masivo */
+.grid-column:nth-child(odd) .app-screen:nth-child(even) {
+    animation-delay: 0.8s;
 }
 
-.grid-column:nth-child(1) .app-screen:nth-child(2) {
-    animation-delay: 0.9s;
+.grid-column:nth-child(even) .app-screen:nth-child(odd) {
+    animation-delay: 1.5s;
 }
 
-.grid-column:nth-child(1) .app-screen:nth-child(3) {
-    animation-delay: 1.8s;
+.grid-column:nth-child(3n) .app-screen:nth-child(3n) {
+    animation-delay: 2.3s;
 }
 
-.grid-column:nth-child(2) .app-screen:nth-child(1) {
-    animation-delay: 0.5s;
+.grid-column:nth-child(4n) .app-screen:nth-child(2n) {
+    animation-delay: 3.1s;
 }
 
-.grid-column:nth-child(2) .app-screen:nth-child(2) {
-    animation-delay: 1.4s;
+.grid-column:nth-child(5n) .app-screen:nth-child(4n) {
+    animation-delay: 1.2s;
 }
 
-.grid-column:nth-child(2) .app-screen:nth-child(3) {
-    animation-delay: 2.2s;
+@keyframes screenFloat {
+    from {
+        transform: translateY(0px);
+    }
+
+    to {
+        transform: translateY(-12px);
+    }
+}
+
+/* ── Profundidad de Campo Inmersiva (Depth of Field para el infinito) ──────────────── */
+.app-screen {
+    transition: filter 0.3s ease;
+}
+
+/* Las filas superiores (más lejanas visualmente) se borronean */
+.grid-column .app-screen:nth-child(1) {
+    filter: blur(5px);
+}
+
+.grid-column .app-screen:nth-child(2) {
+    filter: blur(2.5px);
+}
+
+/* Las columnas más alejadas a la derecha se borronean progresivamente */
+.grid-column:nth-child(n+5) .app-screen {
+    filter: blur(3px);
+}
+
+.grid-column:nth-child(n+6) .app-screen {
+    filter: blur(6px);
+}
+
+/* 🔴 Foco principal 100% nítido (Primer Plano Frontal) */
+.grid-column:nth-child(-n+4) .app-screen:nth-child(n+3) {
+    filter: blur(0) !important;
 }
 
 .grid-column:nth-child(3) .app-screen:nth-child(1) {
@@ -497,7 +519,7 @@ body {
     border-radius: 20px;
     padding: 2rem 1.75rem;
     height: 100%;
-    border: 1px solid rgba(0,0,0,0.04);
+    border: 1px solid rgba(0, 0, 0, 0.04);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
     transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
@@ -599,8 +621,13 @@ body {
 }
 
 @keyframes floatImg {
-    from { transform: translateY(0px);  }
-    to   { transform: translateY(-14px); }
+    from {
+        transform: translateY(0px);
+    }
+
+    to {
+        transform: translateY(-14px);
+    }
 }
 
 /* Decorative blobs behind the screenshot */
@@ -631,7 +658,8 @@ body {
    CTA PREMIUM
    ============================================================ */
 .section-cta {
-    background: #0b0f19;   /* azul noche profundo */
+    background: #0b0f19;
+    /* azul noche profundo */
     padding: 8rem 1.5rem;
     position: relative;
     overflow: hidden;
@@ -644,7 +672,7 @@ body {
     width: 600px;
     height: 600px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(108,99,255,0.15) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(108, 99, 255, 0.15) 0%, transparent 70%);
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -684,7 +712,8 @@ body {
     align-items: center;
     gap: 0.55rem;
     padding: 0.8rem 1.6rem;
-    border-radius: 50px;          /* píldora */
+    border-radius: 50px;
+    /* píldora */
     font-family: 'Mulish', sans-serif;
     font-size: 0.95rem;
     font-weight: 700;
@@ -699,30 +728,30 @@ body {
 .cta-btn-dark {
     background: #ffffff;
     color: #0b0f19;
-    box-shadow: 0 6px 28px rgba(255,255,255,0.15);
+    box-shadow: 0 6px 28px rgba(255, 255, 255, 0.15);
 }
 
 .cta-btn-dark:hover {
     color: #0b0f19;
-    box-shadow: 0 12px 40px rgba(255,255,255,0.25);
+    box-shadow: 0 12px 40px rgba(255, 255, 255, 0.25);
 }
 
 .cta-btn-light {
-    background: rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.1);
     color: #ffffff;
-    border: 1px solid rgba(255,255,255,0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(8px);
 }
 
 .cta-btn-light:hover {
     color: #ffffff;
-    background: rgba(255,255,255,0.18);
-    box-shadow: 0 8px 32px rgba(108,99,255,0.25);
+    background: rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px rgba(108, 99, 255, 0.25);
 }
 
 .cta-note {
     font-size: 0.82rem;
-    color: rgba(255,255,255,0.4);
+    color: rgba(255, 255, 255, 0.4);
     margin: 0;
 }
 
@@ -732,7 +761,7 @@ body {
    ============================================================ */
 .site-footer {
     background: #0b0f19;
-    border-top: 1px solid rgba(255,255,255,0.06);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
     padding: 2.25rem 1.5rem;
 }
 
@@ -746,12 +775,12 @@ body {
 
 .footer-copy {
     font-size: 0.78rem;
-    color: rgba(255,255,255,0.35);
+    color: rgba(255, 255, 255, 0.35);
 }
 
 .footer-link {
     font-size: 0.78rem;
-    color: rgba(255,255,255,0.45);
+    color: rgba(255, 255, 255, 0.45);
     text-decoration: none;
     transition: color 0.2s;
 }
@@ -761,7 +790,7 @@ body {
 }
 
 .footer-sep {
-    color: rgba(255,255,255,0.2);
+    color: rgba(255, 255, 255, 0.2);
     margin: 0 0.4rem;
     font-size: 0.78rem;
 }
